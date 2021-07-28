@@ -155,7 +155,9 @@ abstract class Kernel extends SymfonyKernel
             $loader->load($systemConfigFile);
         }
 
-        $loader->import(PIMCORE_CONFIGURATION_DIRECTORY . '/imagethumbnails/');
+        if (is_dir(PIMCORE_CONFIGURATION_DIRECTORY . '/imagethumbnails/')) {
+            $loader->import(PIMCORE_CONFIGURATION_DIRECTORY . '/imagethumbnails/');
+        }
     }
 
     private function registerExtensionConfigFileResources(ContainerBuilder $container)
