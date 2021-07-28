@@ -90,7 +90,6 @@ final class PimcoreConfigStorage
         $settingsStoreDataIds = SettingsStore::getIdsByScope($scope);
         foreach ($settingsStoreDataIds as $settingsStoreDataId) {
             $settingsStoreEntry = SettingsStore::get($settingsStoreDataId, $scope);
-            $settingsStoreEntryData =
             $settingsStoreEntryData = json_decode($settingsStoreEntry->getData(), true);
 
             //TODO name clash possible ?
