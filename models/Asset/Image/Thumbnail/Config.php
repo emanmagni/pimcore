@@ -219,7 +219,9 @@ final class Config extends Model\AbstractModel
         } catch (\Exception $e) {
             try {
                 $thumbnail = new self();
-                $thumbnail->getDao()->getByName($name);
+                /** @var Model\Asset\Image\Thumbnail\Config\Dao $dao */
+                $dao = $thumbnail->getDao();
+                $dao->getByName($name);
                 \Pimcore\Cache\Runtime::set($cacheKey, $thumbnail);
             } catch (Model\Exception\NotFoundException $e) {
                 return null;
@@ -263,7 +265,9 @@ final class Config extends Model\AbstractModel
 
         $thumbnail = new self();
 
-        return $thumbnail->getLegacyDao()->exists($name);
+        /** @var Model\Asset\Image\Thumbnail\Config\Dao $dao */
+        $dao = $thumbnail->getLegacyDao();
+        return $dao->exists($name);
     }
 
     /**
@@ -950,6 +954,7 @@ final class Config extends Model\AbstractModel
 
 
     public function save(bool $forceClearTempFiles = false) {
+        /** @var Model\Asset\Image\Thumbnail\Config\Dao $dao */
         $dao = $this->getDao();
         $dao->save($forceClearTempFiles);
     }

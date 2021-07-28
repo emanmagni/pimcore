@@ -181,6 +181,7 @@ abstract class Kernel extends SymfonyKernel
 
         // add extensions.php as container resource
         if ($this->extensionConfig->configFileExists()) {
+            /* @phpstan-ignore-next-line */
             $container->addResource(new FileResource($this->extensionConfig->locateConfigFile()));
         }
     }
