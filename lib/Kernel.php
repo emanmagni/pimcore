@@ -156,6 +156,7 @@ abstract class Kernel extends SymfonyKernel
         }
 
         if (is_dir(PIMCORE_CONFIGURATION_DIRECTORY . '/imagethumbnails/')) {
+            /* @phpstan-ignore-next-line */
             $loader->import(PIMCORE_CONFIGURATION_DIRECTORY . '/imagethumbnails/');
         }
     }
@@ -181,7 +182,6 @@ abstract class Kernel extends SymfonyKernel
 
         // add extensions.php as container resource
         if ($this->extensionConfig->configFileExists()) {
-            /* @phpstan-ignore-next-line */
             $container->addResource(new FileResource($this->extensionConfig->locateConfigFile()));
         }
     }
