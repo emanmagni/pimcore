@@ -20,7 +20,7 @@ use Pimcore\Db\PimcoreConfigStorage;
 /**
  * @internal
  */
-abstract class PimcoreConfigBag implements DaoInterface
+abstract class PimcoreConfigBagDao implements DaoInterface
 {
     use DaoTrait;
 

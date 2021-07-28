@@ -25,7 +25,7 @@ use Pimcore\Model\Asset\Image\Thumbnail\Config;
  * @property \Pimcore\Model\Asset\Image\Thumbnail\Config\Listing $model
  * @property PimcoreConfigStorage $db
  */
-class Dao extends Model\Dao\PimcoreConfigBag
+class Dao extends Model\Dao\PimcoreConfigBagDao
 {
     public function configure()
     {
