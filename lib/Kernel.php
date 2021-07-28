@@ -155,34 +155,7 @@ abstract class Kernel extends SymfonyKernel
             $loader->load($systemConfigFile);
         }
 
-        $loader->load(function (ContainerBuilder $container) use ($loader) {
-            //TODO instead of making this configurable ...
-            $pimcoreConfiguration = $container->getExtensionConfig("pimcore");
-
-            foreach ($pimcoreConfiguration as $extensionConfigBlock) {
-                    foreach ($extensionConfigBlock as $extensionConfigName => $data) {
-                        if ($extensionConfigName == "configuration_sections") {
-                            foreach ($data as $item) {
-                                /* Example:
-                                pimcore:
-                                    configuration_sections:
-                                        -
-                                            name: imagethumbnails
-                                            path: var/config/imagethumbnails/
-                                        -
-                                            name: datahub_thumbnails
-                                            path: dev/pimcore/data-hub/datahub_imagethumbnails
-                                */
-                                $name = $item["name"];
-                                $path = $item["path"];
-                                $filepath = PIMCORE_PROJECT_ROOT . "/" . $path;
-                                $loader->import($filepath);
-                            }
-                        }
-                    }
-
-                }
-            });
+        $loader->import(PIMCORE_CONFIGURATION_DIRECTORY . '/imagethumbnails/');
     }
 
     private function registerExtensionConfigFileResources(ContainerBuilder $container)
