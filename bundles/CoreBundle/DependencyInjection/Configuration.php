@@ -167,7 +167,6 @@ final class Configuration implements ConfigurationInterface
         $this->addWebProfilerNode($rootNode);
         $this->addSecurityNode($rootNode);
         $this->addEmailNode($rootNode);
-        $this->addConfigurationSectionsNode($rootNode);
         $this->addImageThumbnailsNode($rootNode);
         $this->addNewsletterNode($rootNode);
         $this->addCustomReportsNode($rootNode);
@@ -1245,21 +1244,6 @@ final class Configuration implements ConfigurationInterface
                             ->useAttributeAsKey('name')
                                 ->prototype('scalar')
                             ->end()
-                        ->end()
-                    ->end()
-                ->end()
-            ->end();
-    }
-
-    private function addConfigurationSectionsNode(ArrayNodeDefinition $rootNode)
-    {
-        $rootNode
-            ->children()
-                ->arrayNode('configuration_sections')
-                    ->prototype('array')
-                        ->children()
-                            ->scalarNode('name')->end()
-                            ->scalarNode('path') ->end()
                         ->end()
                     ->end()
                 ->end()
