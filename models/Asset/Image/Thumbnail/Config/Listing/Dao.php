@@ -30,7 +30,7 @@ class Dao extends Model\Dao\PimcoreConfigBagDao
     public function configure()
     {
         parent::configure();
-        $this->setContext('image-thumbnails');
+        $this->setContext('image-thumbnails', 'pimcore.assets.thumbnails.definitions');
     }
 
     /**

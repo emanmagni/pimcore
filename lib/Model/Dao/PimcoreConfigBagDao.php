@@ -25,7 +25,7 @@ abstract class PimcoreConfigBagDao implements DaoInterface
     use DaoTrait;
 
     /**
-     * @var array
+     * @var PimcoreConfigStorage
      */
     protected $db;
 
@@ -38,15 +38,14 @@ abstract class PimcoreConfigBagDao implements DaoInterface
     }
 
     /**
-     * @param string $legacyKey
+     * @param string $key
      */
-    protected function setContext($legacyKey)
+    protected function setContext($key, $configName)
     {
-        $key = str_replace("-", "", $legacyKey);
         $container = \Pimcore::getContainer();
         $config = $container->getParameter("pimcore.config");
-        $theConfig = $config[$key];
 
-        $this->db = PimcoreConfigStorage::get($key, $legacyKey);
+        $this->db = PimcoreConfigStorage::get($key, $configName);
+        $this->db->setConfig($key, $configName);
     }
 }

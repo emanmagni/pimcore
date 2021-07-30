@@ -36,12 +36,6 @@ final class PimcoreConfigStorage
     protected $key;
 
     /**
-     * @var string holds all keys defined in the legacy file
-     */
-    protected $legacyKey;
-
-
-    /**
      * @var array
      */
     protected $data = [];
@@ -52,30 +46,36 @@ final class PimcoreConfigStorage
     protected $legacyKeys = [];
 
     /**
+     * @var string
+     */
+    protected $configurationKey;
+
+    /**
      * @var int
      */
 //    protected $lastInsertId;
 
-    /**
-     * PimcoreConfigTable constructor.
-     * @param string $key
-     * @param string|null $legacyKey
-     * @throws \Exception
-     */
-    public function __construct(string $key, string $legacyKey = null)
-    {
-        $this->setConfig($key, $legacyKey);
-    }
 
     /**
-     * @param string $key e.g. "imagethumbnails"
-     * @param string|null $legacyKey "image-thumbnails"
-     * @throws \Exception
+     * PimcoreConfigStorage constructor.
+     * @param string $key
+     * @param string $configurationKey
      */
-    public function setConfig(string $key, string $legacyKey = null)
+    public function __construct(string $key, string $configurationKey)
+    {
+        $this->setConfig($key, $configurationKey);
+    }
+
+
+    /**
+     * @param string $key
+     * @param string $configurationKey
+     */
+    public function setConfig(string $key, string $configurationKey)
     {
         $this->key = $key;
-        $this->legacyKey = $legacyKey;
+        $this->configurationKey = $configurationKey;
+
         $this->load();
     }
 
@@ -100,7 +100,13 @@ final class PimcoreConfigStorage
         // load container data
         $container = \Pimcore::getContainer();
         $config = $container->getParameter("pimcore.config");
-        $containerDataItems = $config[$this->key];
+        $containerDataItems = $config;
+        $keyParts = explode(".", $this->configurationKey);
+        array_shift($keyParts);
+
+        foreach ($keyParts as $key) {
+            $containerDataItems = $containerDataItems[$key] ?? [];
+        }
 
         foreach ($containerDataItems as $id => &$containerDataItem) {
             $yamlFilename = $this->getVarConfigFile($id);
@@ -111,7 +117,7 @@ final class PimcoreConfigStorage
 
         // load legacy data
         $legacyData = [];
-        $legacyFile = Config::locateConfigFile($this->legacyKey . '.php');
+        $legacyFile = Config::locateConfigFile($this->key . '.php');
         if (file_exists($legacyFile)) {
             $legacyData = include($legacyFile);
             foreach ($legacyData as &$legacyDataItem) {
@@ -241,14 +247,14 @@ final class PimcoreConfigStorage
 
     /**
      * @param string $key
-     * @param string|null $legacyKey
+     * @param string $configurationKey
      * @return mixed|PimcoreConfigStorage
      * @throws \Exception
      */
-    public static function get(string $key, ?string $legacyKey = null)
+    public static function get(string $key, string $configurationKey)
     {
         if (!isset(self::$tables[$key])) {
-            self::$tables[$key] = new self($key, $legacyKey);
+            self::$tables[$key] = new self($key, $configurationKey);
         }
 
         return self::$tables[$key];
@@ -313,37 +319,46 @@ final class PimcoreConfigStorage
 
         if ($writeLocation === "yaml") {
 
-            $newYamlData = ["pimcore" =>
-                [$this->key => [
-                    $id => $data]
-                ]
-            ];
 
-            // question: do we really need a dirty detection. because of hardcoded modificationDate?
-            if (file_exists($yamlFilename)) {
-                $currentYamlData = Yaml::parseFile($yamlFilename);
-            } else {
-                $currentYamlData = [];
-            }
-            $currentYamlData = $currentYamlData["pimcore"][$this->key][$id] ?? [];
-            unset($currentYamlData['modificationDate']);
-            $cleanedUpNewYamlData = $data;
-            unset($cleanedUpNewYamlData['modificationDate']);
+            $keys = array_reverse(explode('.', $this->configurationKey));
+            $tmp = [];
+            $deepestOne = null;
+            foreach ($keys as $key) {
+                if (!$deepestOne) {
+                    $deepestOne = true;
 
-            if (json_encode($currentYamlData) != json_encode($cleanedUpNewYamlData)) {
-                $newYamlData = Yaml::dump($newYamlData, 5);
+                    unset($data["writeable"]);
+                    $tmp [$key]= [
+                        $data['name'] => $data
+                    ];
 
-                $dirname = $this->getVarConfigDir($id);
-
-                if (!is_dir($dirname)) {
-                    mkdir($dirname, 0775, true);
+                } else {
+                    $tmp = [$key => $tmp];
                 }
-
-                file_put_contents($yamlFilename, $newYamlData);
             }
+            $newYamlData = $tmp;
+
+            $newYamlData = Yaml::dump($newYamlData, 5);
+
+            $dirname = $this->getVarConfigDir($id);
+
+            if (!is_dir($dirname)) {
+                mkdir($dirname, 0775, true);
+            }
+
+            file_put_contents($yamlFilename, $newYamlData);
+
         } else if ($writeLocation === "settingsstore") {
             $settingsStoreData = json_encode($data);
             SettingsStore::set($this->buildSettingsStoreKey($id), $settingsStoreData, 'string', $this->buildSettingsStoreScope());
         }
+    }
+
+    /**
+     * @param string $configurationKey
+     */
+    public function setConfigurationKey($configurationKey)
+    {
+        $this->configurationKey = $configurationKey;
     }
 }
