@@ -45,7 +45,8 @@ class Dao extends Model\Dao\PimcoreConfigBagDao
             $this->model->setName($id);
         }
 
-        $data = $this->db->getById($this->model->getName());
+        $storage = PimcoreConfigStorage::get($this->db->getKey(), $this->db->getConfigurationKey());
+        $data = $storage->getById($this->model->getName());
 
         if ($data && $id != null) {
             $data['id'] = $id;
