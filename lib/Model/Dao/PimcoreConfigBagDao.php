@@ -165,6 +165,12 @@ abstract class PimcoreConfigBagDao implements DaoInterface
         }
 
         File::put($yamlFilename, Yaml::dump($data, 5));
+
+        // invalidate container config cache
+        $systemConfigFile = Config::locateConfigFile('system.yml');
+        if($systemConfigFile) {
+            touch($systemConfigFile);
+        }
     }
 
     /**
