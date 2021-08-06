@@ -22,6 +22,7 @@ use Pimcore\Tool\Serialize;
 /**
  * @method bool isWriteable()
  * @method void delete(bool $forceClearTempFiles = false)
+ * @method void save(bool $forceClearTempFiles = false)
  */
 final class Config extends Model\AbstractModel
 {
@@ -259,21 +260,7 @@ final class Config extends Model\AbstractModel
 
         $thumbnail = new self();
 
-        /** @var Model\Asset\Image\Thumbnail\Config\Dao $dao */
-        $dao = $thumbnail->getLegacyDao();
-        return $dao->exists($name);
-    }
-
-    /**
-     * @return \Pimcore\Model\Dao\AbstractDao
-     */
-    public function getLegacyDao()
-    {
-        if (!$this->dao) {
-            $this->initDao();
-        }
-
-        return $this->dao;
+        return $thumbnail->getDao()->exists($name);
     }
 
     /**

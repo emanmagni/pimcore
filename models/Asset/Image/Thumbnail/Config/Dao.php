@@ -24,7 +24,6 @@ use Symfony\Component\Yaml\Yaml;
  * @internal
  *
  * @property \Pimcore\Model\Asset\Image\Thumbnail\Config $model
- * @property PimcoreConfigStorage $db
  */
 class Dao extends Model\Dao\PimcoreConfigBagDao
 {

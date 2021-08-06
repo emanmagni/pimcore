@@ -132,7 +132,7 @@ abstract class PimcoreConfigBagDao implements DaoInterface
 
     /**
      * @param string $id
-     * @param $data
+     * @param array $data
      * @throws \Exception
      */
     protected function saveData(string $id, $data)
@@ -149,7 +149,7 @@ abstract class PimcoreConfigBagDao implements DaoInterface
 
     /**
      * @param string $id
-     * @param $data
+     * @param array $data
      * @throws \Exception
      */
     protected function writeYaml(string $id, $data): void
