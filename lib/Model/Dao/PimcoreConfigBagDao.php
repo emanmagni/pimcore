@@ -141,7 +141,7 @@ abstract class PimcoreConfigBagDao implements DaoInterface
 
         if ($writeLocation === "yaml") {
             $this->writeYaml($id, $data);
-        } else if ($writeLocation === "settingsstore") {
+        } else if ($writeLocation === "settings-store") {
             $settingsStoreData = json_encode($data);
             SettingsStore::set($id, $settingsStoreData, 'string', $this->settingsStoreScope);
         }
@@ -158,7 +158,7 @@ abstract class PimcoreConfigBagDao implements DaoInterface
 
         if ($this->dataSource && !file_exists($yamlFilename) && $this->dataSource !== self::DATA_SOURCE_LEGACY) {
             // this configuration already exists so check if it is writeable
-            // this is only the case if it comes from var/config or from the legacy file, or the settingsstore
+            // this is only the case if it comes from var/config or from the legacy file, or the settings-store
             // however, we never want to write it back to the legacy file
 
             throw new \Exception(sprintf('Configuration can only be written to %s, however the config comes from a different source', $yamlFilename));
@@ -168,7 +168,7 @@ abstract class PimcoreConfigBagDao implements DaoInterface
     }
 
     /**
-     * @return string Can be either yaml (var/config/...) or "settingsstore". defaults to "yaml"
+     * @return string Can be either yaml (var/config/...) or "settings-store". defaults to "yaml"
      * @throws \Exception
      */
     private function getWriteLocation(): string
@@ -180,7 +180,7 @@ abstract class PimcoreConfigBagDao implements DaoInterface
             $writeLocation = "yaml";
         }
 
-        if (!in_array($writeLocation, ["settingsstore", "yaml"])) {
+        if (!in_array($writeLocation, ["settings-store", "yaml"])) {
             throw new \Exception("invalid write location");
         }
 
