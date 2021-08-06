@@ -258,9 +258,7 @@ final class Config extends Model\AbstractModel
             return true;
         }
 
-        $thumbnail = new self();
-
-        return $thumbnail->getDao()->exists($name);
+        return (bool) self::getByName($name);
     }
 
     /**
