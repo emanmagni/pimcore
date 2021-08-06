@@ -20,6 +20,7 @@ use Pimcore\Model;
 use Pimcore\Tool\Serialize;
 
 /**
+ * @method bool isWriteable()
  * @method void delete(bool $forceClearTempFiles = false)
  */
 final class Config extends Model\AbstractModel
@@ -154,13 +155,6 @@ final class Config extends Model\AbstractModel
      * @var bool
      */
     protected $preserveAnimation = false;
-
-    /**
-     * @internal
-     *
-     * @var bool
-     */
-    protected $writeable = false;
 
     /**
      * @internal
@@ -927,24 +921,6 @@ final class Config extends Model\AbstractModel
     }
 
     /**
-     * @return bool
-     */
-    public function isWriteable(): bool
-    {
-        return $this->writeable;
-    }
-
-    /**
-     * @param bool $writeable
-     */
-    public function setWriteable(bool $writeable): void
-    {
-        $this->writeable = $writeable;
-    }
-
-
-
-    /**
      * @param bool $downloadable
      */
     public function setDownloadable(bool $downloadable): void
@@ -952,12 +928,9 @@ final class Config extends Model\AbstractModel
         $this->downloadable = $downloadable;
     }
 
-
-    public function save(bool $forceClearTempFiles = false) {
-        /** @var Model\Asset\Image\Thumbnail\Config\Dao $dao */
-        $dao = $this->getDao();
-        $dao->save($forceClearTempFiles);
+    public function __clone()
+    {
+        $this->dao = clone $this->dao;
+        $this->dao->setModel($this);
     }
-
-
 }

@@ -28,10 +28,19 @@ use Symfony\Component\Yaml\Yaml;
  */
 class Dao extends Model\Dao\PimcoreConfigBagDao
 {
+    /**
+     * {@inheritdoc}
+     */
     public function configure()
     {
-        parent::configure();
-        $this->setContext('image-thumbnails', 'pimcore.assets.thumbnails.definitions');
+        $config = \Pimcore::getContainer()->getParameter("pimcore.config");
+
+        parent::configure([
+            'containerConfig' => $config['assets']['image']['thumbnails']['definitions'],
+            'settingsStoreKey' => 'pimcore_image_thumbnails',
+            'storageDirectory' => PIMCORE_CONFIGURATION_DIRECTORY . '/image-thumbnails',
+            'legacyConfigFile' => 'image-thumbnails.php',
+        ]);
     }
 
     /**
@@ -45,8 +54,7 @@ class Dao extends Model\Dao\PimcoreConfigBagDao
             $this->model->setName($id);
         }
 
-        $storage = PimcoreConfigStorage::get($this->db->getKey(), $this->db->getConfigurationKey());
-        $data = $storage->getById($this->model->getName());
+        $data = $this->getDataByName($this->model->getName());
 
         if ($data && $id != null) {
             $data['id'] = $id;
@@ -71,7 +79,7 @@ class Dao extends Model\Dao\PimcoreConfigBagDao
      */
     public function exists(string $name): bool
     {
-        return (bool) $this->db->getById($this->model->getName());
+        return (bool) $this->getDataByName($this->model->getName());
     }
 
     /**
@@ -99,18 +107,36 @@ class Dao extends Model\Dao\PimcoreConfigBagDao
             }
         }
 
+        $this->saveData($this->model->getName(), $data);
+
         if ($forceClearTempFiles) {
-            $this->db->insertOrUpdate($data, $this->model->getName());
             $this->model->clearTempFiles();
-        } else {
-            $thumbnailDefinitionAlreadyExisted = $this->db->getById($this->model->getName()) !== null;
-
-            $this->db->insertOrUpdate($data, $this->model->getName());
-
-            if ($thumbnailDefinitionAlreadyExisted) {
-                $this->autoClearTempFiles();
-            }
+        } elseif ($this->dataSource) {
+            // thumbnail already existed
+            $this->autoClearTempFiles();
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function writeYaml($id, $data): void
+    {
+        $data = [
+            'pimcore' => [
+                'assets' => [
+                    'image' => [
+                        'thumbnails' => [
+                            'definitions' => [
+                                $id => $data
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ];
+
+        parent::writeYaml($id, $data);
     }
 
     /**
@@ -120,7 +146,7 @@ class Dao extends Model\Dao\PimcoreConfigBagDao
      */
     public function delete($forceClearTempFiles = false)
     {
-        $this->db->delete($this->model->getName());
+        $this->deleteData($this->model->getName());
 
         if ($forceClearTempFiles) {
             $this->model->clearTempFiles();
@@ -129,6 +155,9 @@ class Dao extends Model\Dao\PimcoreConfigBagDao
         }
     }
 
+    /**
+     *
+     */
     protected function autoClearTempFiles()
     {
         $enabled = \Pimcore::getContainer()->getParameter('pimcore.config')['assets']['image']['thumbnails']['auto_clear_temp_files'];
